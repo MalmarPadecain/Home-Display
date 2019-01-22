@@ -1,0 +1,5 @@
+ROUTER_ADDRESS = ""
+ROUTER_PASSWORD = ""
+DATABASE_ADDRESS = ""
+"""As required by ``sqlalchemy.create_engine``"""
+METEO_ZIP = ""
