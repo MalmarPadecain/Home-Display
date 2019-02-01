@@ -10,6 +10,9 @@ selenium = "*"
 pandas = "*"
 "psycopg2" = "*"
 lxml = "*"
+pygame = "*"
+pillow = "*"
+psutil = "*"
 
 [dev-packages]
 

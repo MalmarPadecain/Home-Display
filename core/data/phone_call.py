@@ -34,8 +34,12 @@ class PhoneCall(db.Base):
     id = Column(Integer, Sequence('phone_call_id_seq'), primary_key=True)
     type = Column(Enum(Type))
     time = Column(DateTime)
-    number = Column(String(16))
+    number = Column(String(64))
 
     @classmethod
     def create(cls, type: str, datestr: str, number: str) -> PhoneCall:
         return PhoneCall(type=Type.from_str(type), time=datetime.strptime(datestr, "%d.%m.%y %H:%M"), number=number)
+
+    @classmethod
+    def get_calls(cls, session, num=20, from_time=datetime.now()):
+        return session.query(cls).order_by(cls.time.desc()).filter(cls.time < from_time).limit(num).all()
