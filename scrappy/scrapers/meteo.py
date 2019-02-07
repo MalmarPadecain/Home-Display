@@ -1,14 +1,15 @@
-from typing import List
+from typing import Iterable
 
 import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
+from core.db import db
 from core.data import WeatherPoint
 
 
-def scrap(zip: str) -> List[WeatherPoint]:
+def scrap(zip: str) -> Iterable[WeatherPoint]:
     # launch url
     url = "https://www.meteoswiss.admin.ch/"
 
@@ -30,8 +31,6 @@ def scrap(zip: str) -> List[WeatherPoint]:
         button = driver.find_element_by_class_name("forecast-local__submit")
         button.click()
 
-        lst = []
-
         while True:
             button = driver.find_element_by_class_name("chart-next")
 
@@ -41,17 +40,16 @@ def scrap(zip: str) -> List[WeatherPoint]:
             dataset = pd.read_html(str(table))[0]
 
             for set in dataset.get_values():
-                lst.append(WeatherPoint.create(zip, set[0], set[1], set[2], set[3], set[4]))
+                yield WeatherPoint.create(zip, set[0], set[1], set[2], set[3], set[4])
 
             if "disabled" in button.get_attribute("class"):
                 break
 
             button.click()
 
-        return lst
-
 
 def scrap_and_write(zip: str):
-    lst = scrap(zip)
-    for element in lst:
-        pass
+    # todo write an implementation with sqlalchemy.dialecs.postgressql.insert to use the ON CONFLICT clause
+    with db.session_scope() as session:
+        for wp in scrap(zip):
+            session.merge(wp)
