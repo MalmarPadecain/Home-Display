@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from datetime import datetime, date
+
+import sqlalchemy
 from sqlalchemy import Column, String, DateTime, Float
-from datetime import datetime
 
 from core import db
 
@@ -20,3 +22,7 @@ class WeatherPoint(db.Base):
         datetime_str = date + " " + time
         dtm = datetime.strptime(datetime_str, "%d.%m.%Y %H:%M")
         return WeatherPoint(zip=zip, time=dtm, temp=temp, rain=rain, description=description)
+
+    @classmethod
+    def get_points(cls, session, date_=date.today()):
+        return session.query(cls).filter(sqlalchemy.func.date(cls.time) == date_).order_by(cls.time.asc()).all()
