@@ -53,6 +53,21 @@ class PhoneCall(db.Base):
     def create(cls, type: str, datestr: str, number: str) -> PhoneCall:
         return PhoneCall(type=Type.from_str(type), time=datetime.strptime(datestr, "%d.%m.%y %H:%M"), number=number)
 
-    @classmethod
-    def get_calls(cls, session, num=20, from_time=datetime.now()):
-        return session.query(cls).order_by(cls.time.desc()).filter(cls.time < from_time).limit(num).all()
+
+class CallStreamer:
+    def __init__(self):
+        self.session = db.Session()
+        self.pos = 0
+        self._last_call = None
+
+    def get_next_n_calls(self, n):
+        print(self.pos)
+        if n < 0:
+            self.pos += 2*n
+            n = abs(n)
+        if self.pos < 0:
+            self.pos = 0
+        calls = self.session.query(PhoneCall).order_by(PhoneCall.time.desc()).offset(self.pos).limit(n).all()
+        if calls:
+            self.pos += n
+        return calls
