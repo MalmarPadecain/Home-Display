@@ -14,6 +14,16 @@ class Type(enum.Enum):
     MISSED = enum.auto()
     REJECTED = enum.auto()
 
+    def __str__(self):
+        if self is Type.OUTGOING:
+            return "outgoing"
+        if self is Type.INCOMING:
+            return "incoming"
+        if self is Type.MISSED:
+            return "missed"
+        if self is Type.REJECTED:
+            return "rejected"
+
     @classmethod
     def from_str(cls, string: str):
         if string == "call_out":
@@ -35,6 +45,9 @@ class PhoneCall(db.Base):
     type = Column(Enum(Type))
     time = Column(DateTime)
     number = Column(String(64))
+
+    def __str__(self):
+        return f"{self.time}: {self.type} {self.number}"
 
     @classmethod
     def create(cls, type: str, datestr: str, number: str) -> PhoneCall:
