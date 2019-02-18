@@ -49,25 +49,40 @@ class PhoneCall(db.Base):
     def __str__(self):
         return f"{self.time}: {self.type} {self.number}"
 
+    def __repr__(self):
+        return str(self.number)
+
     @classmethod
     def create(cls, type: str, datestr: str, number: str) -> PhoneCall:
         return PhoneCall(type=Type.from_str(type), time=datetime.strptime(datestr, "%d.%m.%y %H:%M"), number=number)
 
 
-class CallStreamer:
+class CallPaginator:
     def __init__(self):
         self.session = db.Session()
-        self.pos = 0
-        self._last_call = None
+        self.offset = 0
+        self._last_calls = None
 
     def get_next_n_calls(self, n):
-        print(self.pos)
+        session = db.Session()
+        
+        print(self.offset)
         if n < 0:
-            self.pos += 2*n
-            n = abs(n)
-        if self.pos < 0:
-            self.pos = 0
-        calls = self.session.query(PhoneCall).order_by(PhoneCall.time.desc()).offset(self.pos).limit(n).all()
-        if calls:
-            self.pos += n
+            if self._last_calls:
+                self.offset += 2 * n
+            else:
+                self.offset += n
+
+        if self.offset < 0:
+            self.offset = 0
+
+        calls = self._query(abs(n), session)
+        self._last_calls = calls
+
+        self.offset += len(calls)
+
+        session.close()
         return calls
+
+    def _query(self, n, session):
+        return session.query(PhoneCall).order_by(PhoneCall.time.desc()).offset(self.offset).limit(n).all()
