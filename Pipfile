@@ -13,6 +13,8 @@ lxml = "*"
 pygame = "*"
 pillow = "*"
 psutil = "*"
+pytest = "*"
+pytest-mock = "*"
 
 [dev-packages]
 

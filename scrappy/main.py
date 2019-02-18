@@ -4,7 +4,7 @@ import functools
 from scrappy.scrapers import meteo, calls
 import secret
 
-calls.scrap()
+meteo.scrap_and_write(secret.METEO_ZIP)
 
 # methods = [functools.partial(meteo.scrap_and_write, secret.METEO_ZIP), phone_list.scrap_and_write]
 #
